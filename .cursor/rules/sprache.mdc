@@ -1,0 +1,8 @@
+---
+description: sprache in englisch
+globs:
+name: sprache
+alwaysApply: false
+---
+
+- Kommentare und Variablne in Englisch. Das Projekt soll international verfügbar sein
