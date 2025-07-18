@@ -77,7 +77,9 @@ This card requires the **[Brokkoli Cannabis Management](https://github.com/dinga
 ### Brokkoli Card
 Individual plant monitoring with sensor information and interactive elements.
 
-![image](https://github.com/user-attachments/assets/ba7094b6-6f68-4d7e-872e-832efedc6039) ![image](https://github.com/user-attachments/assets/cf0fea96-dbf1-4398-889f-dd6f128d820e) ![image](https://github.com/user-attachments/assets/29d8175c-ab82-45f7-8330-de497c108a1d) ![image](https://github.com/user-attachments/assets/8fb61d48-dec5-460e-9ef2-2f019fd4dbdd) ![image](https://github.com/user-attachments/assets/13423871-dd1e-41a2-83de-fa6cb2f8a5c7)
+![image](https://github.com/user-attachments/assets/ba7094b6-6f68-4d7e-872e-832efedc6039)
+
+![image](https://github.com/user-attachments/assets/cf0fea96-dbf1-4398-889f-dd6f128d820e) ![image](https://github.com/user-attachments/assets/29d8175c-ab82-45f7-8330-de497c108a1d) ![image](https://github.com/user-attachments/assets/8fb61d48-dec5-460e-9ef2-2f019fd4dbdd) ![image](https://github.com/user-attachments/assets/13423871-dd1e-41a2-83de-fa6cb2f8a5c7)
 
 #### Configuration Options
 ```yaml
