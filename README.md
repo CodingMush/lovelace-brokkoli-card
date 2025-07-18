@@ -1,32 +1,91 @@
-# Brokkoli Card
+# Brokkoli Card for Home Assistant
 
-**This Brokkoli Card requires the following Plant component:
-https://github.com/dingausmwald/homeassistant-brokkoli**
+**Lovelace cards for cannabis visualization - Part of the Brokkoli Suite**
 
-The cards can be set up using the graphical user interface (requires version 3.0.0 or higher).
+Lovelace cards for monitoring cannabis plants in Home Assistant. Requires the Brokkoli Cannabis Management integration for plant visualization and management.
 
-## Table of Contents
+## 🌱 Features
 
-- [Brokkoli Card](#brokkoli-card) - Main card for individual plants
-- [Brokkoli Area Card](#brokkoli-area-card) - Card for displaying plants in an area
-- [Brokkoli List Card](#brokkoli-list-card) - Card for a tabular overview of all plants
-- [Installation](#installation)
-- [Dependencies](#dependencies)
+### Three Specialized Card Types
+- **Individual Plant Cards**: Detailed monitoring with sensors, timelines, and consumption tracking
+- **Area Cards**: Interactive spatial plant arrangement with drag & drop positioning
+- **List Cards**: Tabular overview with sorting, filtering, and bulk operations
 
-## Brokkoli Card
+### Visualization Features
+- **Sensor Bars**: Display of moisture, temperature, light, conductivity, pH, humidity, and health
+- **Interactive Elements**: Expandable sections for timeline, consumption, history, and detailed information
+- **Heatmaps**: Visual representation of sensor data across plant areas
+- **Colored Rings**: Status indicators around plants in area view
 
-The main card for individual plants with detailed information and graphics.
+### Management Features
+- **Drag & Drop**: Plant positioning in area cards
+- **Multi-selection**: Bulk operations on multiple plants
+- **Cross-card Communication**: Synchronized selection across different card types
+- **Filtering & Search**: Plant discovery and organization
 
-![image](https://github.com/user-attachments/assets/ba7094b6-6f68-4d7e-872e-832efedc6039) ![image](https://github.com/user-attachments/assets/cf0fea96-dbf1-4398-889f-dd6f128d820e) ![image](https://github.com/user-attachments/assets/29d8175c-ab82-45f7-8330-de497c108a1d) ![image](https://github.com/user-attachments/assets/8fb61d48-dec5-460e-9ef2-2f019fd4dbdd) ![image](https://github.com/user-attachments/assets/13423871-dd1e-41a2-83de-fa6cb2f8a5c7)
+## 🔧 Installation
 
-### YAML Configuration
+### Prerequisites
+This card requires the **[Brokkoli Cannabis Management](https://github.com/dingausmwald/homeassistant-brokkoli)** integration to function properly.
 
+### HACS Installation (Recommended)
+
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+
+1. Add this repository as a [Custom Repository](https://hacs.xyz/docs/faq/custom_repositories/) in HACS
+2. Set the category to "Lovelace"
+3. Click "Install" on the "Brokkoli Card" card
+4. **Important**: Manually add dashboard resources for list and area cards:
+   - Go to **Settings** → **Dashboards** → **Resources**
+   - Add `/hacsfiles/lovelace-brokkoli-card/brokkoli-list-card.js` as JavaScript Module
+   - Add `/hacsfiles/lovelace-brokkoli-card/brokkoli-area-card.js` as JavaScript Module
+5. Refresh your browser (Shift+Reload recommended)
+
+### Manual Installation
+
+1. Download `brokkoli-card.js`, `brokkoli-area-card.js`, and `brokkoli-list-card.js`
+2. Place files in your `<config>/www/` directory
+3. Add resources in **Settings** → **Dashboards** → **Resources**:
+   ```yaml
+   Url: /local/<path-to>/brokkoli-card.js
+   Resource type: JavaScript Module
+   ```
+4. Repeat for all three card files
+5. Refresh your browser
+
+## 🚀 Quick Start
+
+### 1. Set up your first plant card
+1. Edit your dashboard and add a new card
+2. Search for "Brokkoli Card" in the card picker
+3. Select your cannabis plant entity
+4. Customize display options and sensor bars
+
+### 2. Create an area overview
+1. Add a "Brokkoli Area Card" to your dashboard
+2. Configure it to show plants from a specific area
+3. Use drag & drop to position plants visually
+4. Enable heatmaps for sensor visualization
+
+### 3. Build a plant management dashboard
+1. Add a "Brokkoli List Card" for tabular overview
+2. Enable multi-selection and filtering
+3. Configure cross-card communication with identifiers
+
+## 📊 Card Types
+
+### Brokkoli Card
+Individual plant monitoring with sensor information and interactive elements.
+
+![image](https://github.com/user-attachments/assets/ba7094b6-6f68-4d7e-872e-832efedc6039)
+
+#### Configuration Options
 ```yaml
 type: custom:brokkoli-card
 entity: plant.my_plant            # Required: The plant entity
-battery_sensor: sensor.demo_battery   # Optional: Battery sensor for the card
+battery_sensor: sensor.demo_battery   # Optional: Battery sensor
 
-# Which bars should be displayed (optional, default values if not defined)
+# Sensor bars to display
 show_bars:
   - moisture
   - temperature
@@ -37,12 +96,11 @@ show_bars:
   - fertility
   - health
 
-# Which bars should be displayed in full width (optional)
+# Full-width bars
 full_width_bars:
   - health
 
-# Which elements should be displayed directly on the card (optional, in this order)
-# Default values if not defined: header, attributes, options
+# Elements to show on card
 show_elements:
   - header
   - attributes
@@ -50,8 +108,7 @@ show_elements:
   - timeline
   - consumption
 
-# Which elements are available in the options menu (optional)
-# Default values if not defined: attributes, timeline, consumption, history, details
+# Options menu elements
 option_elements:
   - attributes
   - timeline
@@ -59,194 +116,224 @@ option_elements:
   - history
   - details
 
-# Which options are expanded by default (optional)
+# Default expanded options
 default_expanded_options:
   - timeline
   - history
 
-# Display type: "full" or "compact" (optional, default: "full")
+# Display type: "full" or "compact"
 display_type: full
 
-# Listen to selection events from other cards (optional)
+# Cross-card communication
 listen_to: my_identifier
 
-# Grouping for history (optional)
+# History grouping
 history_groups:
   - moisture
   - temperature
   - conductivity
 
-# Position of the history line: "left" or "right" (optional, default: "left")
+# History line position: "left" or "right"
 history_line_position: left
 ```
 
-### Available Elements
-
-* `header` - Header area with plant image and basic information
-* `attributes` - Attribute bars (moisture, temperature, etc.)
-* `options` - Options menu with buttons
-* `timeline` - Timeline area with graph
-* `consumption` - Consumption area
-* `history` - History area
-* `details` - Detailed plant information
-
-## Brokkoli Area Card
-
-Displays plants as interactive elements in an area. Plants can be positioned via drag & drop and show colored rings for different sensors.
+### Brokkoli Area Card
+Spatial plant arrangement with visual sensor indicators.
 
 ![image](https://github.com/user-attachments/assets/f8a0572f-ab5b-495d-9ba8-2de1f72727fe)
 
-
-### YAML Configuration
-
+#### Configuration Options
 ```yaml
 type: custom:brokkoli-area-card
-title: My Plant Area     # Optional: Card title
+title: My Plant Area
 
-# Define which plants should be displayed (at least one of these options must be specified)
-area: living_room                 # Optional: Area from which plants are displayed
-entity: plant.my_plant           # Optional: Single plant to display
-entities:                        # Optional: List of plants to display
+# Plant selection (choose one)
+area: living_room                 # Show plants from area
+entity: plant.my_plant           # Single plant
+entities:                        # Multiple plants
   - plant.plant1
   - plant.plant2
 
-# Unique ID for the card when it needs to communicate with other cards
-identifier: my_area         # Optional: Unique identifier for this card
+# Cross-card communication
+identifier: my_area
 
-# Which sensors should be displayed as rings around the plants
-# Default: health, moisture, temperature
+# Sensor rings around plants
 show_rings:
   - health
   - moisture
   - temperature
   - brightness
 
-# Which sensors should be displayed as labels in the center (optional)
+# Center labels
 show_labels:
   - moisture
   - temperature
 
-# Heatmap configuration (optional)
-heatmap: moisture                 # Sensor for the heatmap (e.g., moisture, temperature)
-heatmap_color: "#00ff00"          # Custom color for the heatmap
-heatmap_secondary_color: "white"  # Secondary color for the heatmap
-heatmap_opacity: 0.8              # Opacity for the heatmap (0.0 - 1.0)
+# Heatmap configuration
+heatmap: moisture
+heatmap_color: "#00ff00"
+heatmap_secondary_color: "white"
+heatmap_opacity: 0.8
 
-# Whether the legend should be displayed (optional, default: true)
+# Show legend
 legend: true
 ```
 
-The Brokkoli Area Card allows you to:
-- Position plants using drag & drop
-- Move multiple plants simultaneously
-- Visualize sensor states as colored rings
-- Display a heatmap for a selected sensor
-- Group and arrange plants
-- Display details or interact with other Brokkoli cards when clicking on a plant
-
-## Brokkoli List Card
-
-Displays a tabular overview of all plants. Enables sorting, filtering, and multiple selection.
+### Brokkoli List Card
+Tabular overview with filtering and bulk operations.
 
 ![image](https://github.com/user-attachments/assets/4d743a10-e6a1-4f5e-b68b-5fbdb68e8fb9)
 
-### YAML Configuration
-
+#### Configuration Options
 ```yaml
 type: custom:brokkoli-list-card
-title: Plant Overview          # Optional: Card title
-area: living_room              # Optional: Filters plants in a specific area
+title: Plant Overview
+area: living_room              # Filter by area
 
-# Unique ID for the card when it needs to communicate with other cards
-identifier: my_list           # Optional: Unique identifier for this card
+# Cross-card communication
+identifier: my_list
 
-# Configure search function (optional)
+# Search configuration
 search:
-  enabled: true                   # Enable/disable search function
-  placeholder: Search for plants...  # Placeholder text for the search field
+  enabled: true
+  placeholder: Search for plants...
 
-# Configure multiple selection (optional)
+# Multi-selection
 multiselect:
-  enabled: true                   # Enable/disable multiple selection
-  showbydefault: false            # Activate multiple selection mode by default
+  enabled: true
+  showbydefault: false
 
-# Configure filter function (optional)
+# Filtering
 filter:
-  enabled: true                   # Enable/disable filter function
-  showbydefault: false            # Activate filter mode by default
-  filters:                        # Predefined filters (optional)
-    entity_type: ['plant', 'cycle']  # Filter by entity type
-    area: ['living_room', 'kitchen']    # Filter by areas
+  enabled: true
+  showbydefault: false
+  filters:
+    entity_type: ['plant', 'cycle']
+    area: ['living_room', 'kitchen']
+    moisture:
+      min: 20
+      max: 80
+    temperature:
+      min: 18
+      max: 28
 
-# Configuration for "Add New Plant" (optional)
+# Add plant button
 add_plant:
-  enabled: true                   # Show button to add a plant
-  position: bottom                # Button position: "top" or "bottom"
+  enabled: true
+  position: bottom
 
-# Which columns should be displayed (true = show, false = hide)
+# Column visibility
 show_columns:
-  friendly_name: true             # Plant name
-  state: true                     # Status
-  area: true                      # Area
-  moisture: true                  # Moisture
-  temperature: true               # Temperature
-  brightness: false               # Brightness
-  conductivity: false             # Conductivity
-  fertility: false                # Fertility
-  humidity: false                 # Humidity
-  ph: false                       # pH value
-  health: true                    # Health
-  battery: false                  # Battery
-  growth_phase: false             # Growth phase
-  pot_size: false                 # Pot size
-
-  images: false                   # Images
-  notes: false                    # Notes
-  cycle: false                    # Cycle
-  variant: false                  # Variant
-  # And many more options...
+  friendly_name: true
+  state: true
+  area: true
+  moisture: true
+  temperature: true
+  brightness: false
+  conductivity: false
+  fertility: false
+  humidity: false
+  ph: false
+  health: true
+  battery: false
+  growth_phase: false
+  pot_size: false
+  images: false
+  notes: false
+  cycle: false
+  variant: false
 ```
 
-## Installation
+## 🎨 Brokkoli Suite Integration
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+The Brokkoli Card is part of the Brokkoli Suite for cannabis cultivation:
 
-### ATM Dashboard Resources for list and area card have to be added manually!! Just add another ressource and copy the existing brokkoli-card resource and change to brokkoli-list-card and *-area-card
+### [Brokkoli Cannabis Management](https://github.com/dingausmwald/homeassistant-brokkoli)
+- Core integration for cannabis plant monitoring
+- Device-based plant management with sensors
+- Configurable thresholds and problem detection
+- Cycle system for plant grouping
+- Comprehensive service API
 
-### Via HACS
-* Add this repository as a "Custom repository" with type "Lovelace"
-  * Click on HACS in your Home Assistant
-  * Click on Frontend
-  * Click on the 3 dots in the upper right corner and select "Custom Repositories"
-  * Add the URL to this GitHub repository (https://github.com/dingausmwald/lovelace-brokkoli-card) and the category "Lovelace"
-* Click on "Install" in the new "Brokkoli Card" card in HACS
-* Wait until the installation is complete
-* You don't need to restart Home Assistant, but you probably need to refresh the frontend and/or use "Shift-Reload" to update the browser cache.
+### [Seedfinder Integration](https://github.com/dingausmwald/homeassistant-seedfinder)
+- Cannabis strain database access
+- Strain data and imagery
+- Growth phase definitions
+- Cultivation information
 
-### Manual Installation
-1. Download the files `brokkoli-card.js`, `brokkoli-area-card.js`, and `brokkoli-list-card.js` and add them somewhere in your `<config>/www/` folder in HA
- 
-2. Click on your profile picture in the lower left corner -> Enable advanced mode.
- 
-3. Go to Configuration -> Lovelace Dashboards -> Resources -> press the + (bottom right corner of the screen) and add the following information:
+## 🔗 Cross-Card Communication
 
-```yaml
-  Url: /local/<path to>/brokkoli-card.js
-  Resource type: JavaScript Module
-```
-Repeat this for `brokkoli-area-card.js` and `brokkoli-list-card.js`.
+Enable interaction between different card types:
 
-4. After that, press *Create* to add the new resource.
+1. **Set up communication identifiers**:
+   ```yaml
+   # In Area or List Card
+   identifier: my_plants
+   
+   # In Individual Plant Card
+   listen_to: my_plants
+   ```
 
-5. You don't need to restart Home Assistant, but you probably need to refresh the frontend and/or use "Shift-Reload" to update the browser cache.
+2. **Benefits**:
+   - Selecting a plant in Area/List Card updates the Individual Plant Card
+   - Synchronized plant selection across dashboard
+   - Coordinated multi-card layouts
 
-## Dependencies
-1. Custom Plant Integration (https://github.com/dingausmwald/homeassistant-brokkoli)
+## 🎛️ Configuration Details
 
-## Communication Between Cards
+### Available Elements
+- `header` - Plant image and basic information
+- `attributes` - Sensor bars and readings
+- `options` - Interactive options menu
+- `timeline` - Historical data visualization
+- `consumption` - Power and resource tracking
+- `history` - Detailed sensor history
+- `details` - Comprehensive plant information
 
-All three cards can communicate with each other when configured with matching identifiers:
+### Sensor Bar Types
+- **Moisture**: Soil moisture percentage
+- **Temperature**: Ambient temperature
+- **Brightness/Light**: Light intensity (lux)
+- **Conductivity**: Soil conductivity (µS/cm)
+- **pH**: Soil pH level
+- **Humidity**: Air humidity percentage
+- **DLI**: Daily Light Integral
+- **Fertility**: Nutrient levels
+- **Health**: Overall plant health status
 
-1. Set an `identifier` in the Brokkoli Area Card or Brokkoli List Card
-2. Set `listen_to` in the Brokkoli Card to the same value
-3. When you now select a plant in the Area or List Card, the Brokkoli Card will automatically update
+## 🆘 Troubleshooting
+
+### Cards Not Loading
+- Ensure all JavaScript modules are properly added to Dashboard Resources
+- Clear browser cache with Shift+Reload
+- Verify Brokkoli Cannabis Management integration is installed and configured
+
+### Cross-Card Communication Not Working
+- Check that identifiers match exactly between cards
+- Ensure cards are on the same dashboard
+- Verify plant entities exist and are accessible
+
+### Performance Issues
+- Reduce the number of visible sensor bars
+- Limit history data range
+- Consider using compact display mode for multiple cards
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit pull requests, report issues, or suggest improvements.
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## ☕ Support
+
+If you find this project helpful, consider supporting its development:
+
+<a href="https://buymeacoffee.com/dingausmwald" target="_blank">
+<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;">
+</a>
+
+---
+
+**Part of the Brokkoli Suite** - Cannabis cultivation tracking for Home Assistant
