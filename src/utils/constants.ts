@@ -184,8 +184,7 @@ export const getGrowthPhaseIcon = (phase: string, hass?: HomeAssistant, plantEnt
         case 'rooting':
         case 'wurzeln':
             return 'mdi:sprout';
-        // case 'growth':
-        case 'growing':
+        case 'growth':
         case 'wachstum':
             return 'mdi:leaf';
         case 'flower':
