@@ -122,10 +122,10 @@
           "energy_cost": "Energia Költség"
         },
         "growth_phases": {
-          "seed": "Mag",
+          "seeds": "Mag",
           "germination": "Csírázás",
           "rooting": "Gyökeresedés",
-          "growth": "Növekedés",
+          "growing": "Növekedés",
           "flowering": "Virágzás",
           "harvested": "Betakarítva",
           "removed": "Eltávolítva"

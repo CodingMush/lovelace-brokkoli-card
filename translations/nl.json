@@ -121,10 +121,10 @@
           "energy_cost": "Energiekosten"
         },
         "growth_phases": {
-          "seed": "Zaad",
+          "seeds": "Zaad",
           "germination": "Kieming",
           "rooting": "Worteling",
-          "growth": "Groei",
+          "growing": "Groei",
           "flowering": "Bloei",
           "harvested": "Geoogst",
           "removed": "Verwijderd"

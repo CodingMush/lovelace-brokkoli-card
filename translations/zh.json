@@ -122,10 +122,10 @@
           "energy_cost": "能源成本"
         },
         "growth_phases": {
-          "seed": "种子",
+          "seeds": "种子",
           "germination": "发芽",
           "rooting": "生根",
-          "growth": "生长",
+          "growing": "生长",
           "flowering": "开花",
           "harvested": "已收获",
           "removed": "已移除"
