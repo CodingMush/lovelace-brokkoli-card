@@ -91,7 +91,7 @@ interface PhaseDurations {
     'seeds': number;
     'Germination': number;
     'Rooting': number;
-    'Growth': number;
+    'Growing': number;
     'Flowering Past': number;
     'Flowering To Go': number;
     'Harvested': number;
@@ -334,9 +334,9 @@ export class FlowerConsumption extends LitElement {
                 growthPhaseEntity.attributes.rooting_start,
                 growthPhaseEntity.attributes.rooting_duration
             ),
-            'Growth': this._calculatePhaseDuration(
-                growthPhaseEntity.attributes.growth_start,
-                growthPhaseEntity.attributes.growth_duration
+            'Growing': this._calculatePhaseDuration(
+                growthPhaseEntity.attributes.growing_start,
+                growthPhaseEntity.attributes.growing_duration
             ),
             'Flowering Past': 0,
             'Flowering To Go': 0,
@@ -458,9 +458,9 @@ ${TranslationUtils.translateUI(this.hass, 'no_completed_phases')}
                 growthPhaseEntity.attributes.rooting_start,
                 growthPhaseEntity.attributes.rooting_duration
             ),
-            'Growth': this._calculatePhaseDuration(
-                growthPhaseEntity.attributes.growth_start,
-                growthPhaseEntity.attributes.growth_duration
+            'Growing': this._calculatePhaseDuration(
+                growthPhaseEntity.attributes.growing_start,
+                growthPhaseEntity.attributes.growing_duration
             ),
             'Flowering Past': 0,
             'Flowering To Go': 0,

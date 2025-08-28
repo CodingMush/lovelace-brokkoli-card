@@ -6,7 +6,7 @@ export const CARD_EDITOR_NAME = "brokkoli-card-editor";
 
 // Central phase constants - should match field-definitions.ts
 // export const PHASES = ['seed', 'germination', 'rooting', 'growth', 'flowering', 'removed', 'harvested'] as const;
-export const PHASES = ['seeds', 'germination', 'rooting', 'growth', 'flowering', 'removed', 'harvested'] as const;
+export const PHASES = ['seeds', 'germination', 'rooting', 'growing', 'flowering', 'removed', 'harvested'] as const;
 
 export const default_show_bars = [
     "moisture",
@@ -184,7 +184,7 @@ export const getGrowthPhaseIcon = (phase: string, hass?: HomeAssistant, plantEnt
         case 'rooting':
         case 'wurzeln':
             return 'mdi:sprout';
-        case 'growth':
+        case 'growing':
         case 'wachstum':
             return 'mdi:leaf';
         case 'flower':
