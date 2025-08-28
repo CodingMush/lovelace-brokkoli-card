@@ -285,8 +285,8 @@ export const FIELD_DEFINITIONS: FieldDefinition[] = [
         }
     },
     {
-        id: 'growth_duration',
-        name: (hass: HomeAssistant) => TranslationUtils.translateField(hass, 'growth_duration'),
+        id: 'growing_duration',
+        name: (hass: HomeAssistant) => TranslationUtils.translateField(hass, 'growing_duration'),
         group: 'phaseduration',
         type: 'number' as FieldType,
         clickAction: 'edit' as ClickAction,
