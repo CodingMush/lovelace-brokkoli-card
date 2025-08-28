@@ -154,10 +154,10 @@
       "energy_cost": "Energiekosten"
     },
     "growth_phases": {
-      "seed": "Samen",
+      "seeds": "Samen",
       "germination": "Keimen",
       "rooting": "Wurzeln",
-      "growth": "Wachstum",
+      "growing": "Wachstum",
       "flowering": "Blüte",
       "harvested": "Geerntet",
       "removed": "Entfernt"

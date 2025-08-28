@@ -122,10 +122,10 @@
           "energy_cost": "Custo de Energia"
         },
         "growth_phases": {
-          "seed": "Semente",
+          "seeds": "Semente",
           "germination": "Germinação",
           "rooting": "Enraizamento",
-          "growth": "Crescimento",
+          "growing": "Crescimento",
           "flowering": "Floração",
           "harvested": "Colhida",
           "removed": "Removida"

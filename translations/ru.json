@@ -122,10 +122,10 @@
           "energy_cost": "Стоимость Энергии"
         },
         "growth_phases": {
-          "seed": "Семя",
+          "seeds": "Семя",
           "germination": "Прорастание",
           "rooting": "Укоренение",
-          "growth": "Рост",
+          "growing": "Рост",
           "flowering": "Цветение",
           "harvested": "Собрано",
           "removed": "Удалено"
