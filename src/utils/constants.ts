@@ -6,7 +6,7 @@ export const CARD_EDITOR_NAME = "brokkoli-card-editor";
 
 // Central phase constants - should match field-definitions.ts
 // export const PHASES = ['seed', 'germination', 'rooting', 'growth', 'flowering', 'removed', 'harvested'] as const;
-export const PHASES = ['seeds', 'germination', 'rooting', 'growing', 'flowering', 'removed', 'harvested'] as const;
+export const PHASES = ['seeds', 'germination', 'growing', 'flowering', 'removed', 'rooting', 'harvested'] as const;
 
 export const default_show_bars = [
     "moisture",
