@@ -241,7 +241,11 @@ export const FIELD_DEFINITIONS: FieldDefinition[] = [
         group: 'phasebegin',
         type: 'date' as FieldType,
         clickAction: 'edit' as ClickAction,
-        service: PLANT_ATTRIBUTE_SERVICE
+        service: PLANT_ATTRIBUTE_SERVICE,
+        getValue: (_: HomeAssistant, plant: HomeAssistantEntity) => {
+            const dateString = plant.attributes[id];
+            return dateString ? new Date(dateString).getTime() : null;
+        }
     })),
 
     // Phase Duration group
