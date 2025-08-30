@@ -243,8 +243,8 @@ export const FIELD_DEFINITIONS: FieldDefinition[] = [
         clickAction: 'edit' as ClickAction,
         service: PLANT_ATTRIBUTE_SERVICE,
         getValue: (_: HomeAssistant, plant: HomeAssistantEntity) => {
-            const dateString = plant.attributes[id];
-            return dateString ? new Date(dateString).getTime() : null;
+            const dateString = plant.attributes[`${phase}_start`];
+            return dateString ? new Date(dateString).getTime() : 0;
         }
     })),
 
