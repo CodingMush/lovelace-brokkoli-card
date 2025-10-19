@@ -4,9 +4,8 @@ import { HomeAssistant } from "custom-card-helpers";
 export const CARD_NAME = "brokkoli-card";
 export const CARD_EDITOR_NAME = "brokkoli-card-editor";
 
-// Central phase constants - should match field-definitions.ts
-// export const PHASES = ['seed', 'germination', 'rooting', 'growth', 'flowering', 'removed', 'harvested'] as const;
-export const PHASES = ['seeds', 'germination', 'rooting', 'growing', 'flowering', 'removed', 'harvested'] as const;
+// Central phase constants - should match field-definitions.ts and backend const.py
+export const PHASES = ['seeds', 'germination', 'rooting', 'growing', 'flowering', 'harvested', 'removed'] as const;
 
 export const default_show_bars = [
     "moisture",
