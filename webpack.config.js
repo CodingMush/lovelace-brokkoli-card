@@ -33,21 +33,8 @@ module.exports = {
             },
             {
                 test: /\.tsx?$/,
-                exclude: [
-                    /node_modules/,
-                    /\.test\.ts$/,
-                    /\.test\.tsx$/,
-                    /\.spec\.ts$/,
-                    /\.spec\.tsx$/
-                ],
-                use: {
-                    loader: 'ts-loader',
-                    options: {
-                        compilerOptions: {
-                            noEmit: false
-                        }
-                    }
-                }
+                exclude: /node_modules/,
+                use: 'ts-loader'
             }
         ],
     },
