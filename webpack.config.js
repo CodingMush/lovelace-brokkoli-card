@@ -32,10 +32,12 @@ module.exports = {
                 },
             },
             {
-                test: /\.tsx?$/,
-                use: 'ts-loader',
-                exclude: [/node_modules/, /\.test\.ts$/],
-              }
+                test: /(?<!\.test)\.tsx?$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'ts-loader'
+                }
+            }
         ],
     },
     plugins: [
