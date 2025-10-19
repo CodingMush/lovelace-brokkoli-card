@@ -147,7 +147,11 @@ export const FIELD_DEFINITIONS: FieldDefinition[] = [
         clickAction: 'edit' as ClickAction,
         service: SELECT_SERVICE,
         options: (hass, plant) => getEntityOptions(hass, plant, 'select', 'growth_phase'),
-        getValue: (hass, plant) => getEntityState(hass, plant, 'select', 'growth_phase')
+        getValue: (hass, plant) => {
+            const state = getEntityState(hass, plant, 'select', 'growth_phase');
+            // Return lowercase for consistent sorting
+            return state ? state.toLowerCase() : '';
+        }
     },
     {
         id: 'cycle',

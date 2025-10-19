@@ -27,6 +27,22 @@ export class SortUtils {
                 const bPhase = String(bValue).toLowerCase() as typeof PHASES[number];
                 const aIndex = PHASES.indexOf(aPhase);
                 const bIndex = PHASES.indexOf(bPhase);
+                
+                // Debug: Log wenn Phase nicht gefunden wird
+                if (aIndex === -1) {
+                    console.warn(`Phase nicht gefunden in PHASES-Array: "${aPhase}". Verfügbare Phasen:`, PHASES);
+                }
+                if (bIndex === -1) {
+                    console.warn(`Phase nicht gefunden in PHASES-Array: "${bPhase}". Verfügbare Phasen:`, PHASES);
+                }
+                
+                // Fallback: Wenn Phase nicht im Array, alphabetisch sortieren
+                if (aIndex === -1 || bIndex === -1) {
+                    return sortDirection === 'asc' 
+                        ? aPhase.localeCompare(bPhase)
+                        : bPhase.localeCompare(aPhase);
+                }
+                
                 return sortDirection === 'asc' ? aIndex - bIndex : bIndex - aIndex;
             }
 
