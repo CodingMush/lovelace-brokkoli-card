@@ -32,15 +32,29 @@ module.exports = {
                 },
             },
             {
-                test: /(?<!\.test)\.tsx?$/,
-                exclude: /node_modules/,
+                test: /\.tsx?$/,
+                exclude: [
+                    /node_modules/,
+                    /\.test\.ts$/,
+                    /\.test\.tsx$/,
+                    /\.spec\.ts$/,
+                    /\.spec\.tsx$/
+                ],
                 use: {
-                    loader: 'ts-loader'
+                    loader: 'ts-loader',
+                    options: {
+                        compilerOptions: {
+                            noEmit: false
+                        }
+                    }
                 }
             }
         ],
     },
     plugins: [
+        new webpack.IgnorePlugin({
+            resourceRegExp: /\.test\.ts$/
+        }),
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify('production'),
         }),
