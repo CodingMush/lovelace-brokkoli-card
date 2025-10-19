@@ -341,6 +341,63 @@ export const FIELD_DEFINITIONS: FieldDefinition[] = [
         }
     },
 
+    // Tent-specific sensors group
+    {
+        id: 'tent_illuminance',
+        name: (hass: HomeAssistant) => TranslationUtils.translateSensor(hass, 'illuminance'),
+        group: 'tent_sensors',
+        type: 'sensor',
+        clickAction: 'more-info' as ClickAction,
+        unit: 'lx',
+        isSensor: true,
+        showStatusBar: true,
+        getValue: (hass, plant) => getEntityState(hass, plant, 'sensor', 'illuminance')
+    },
+    {
+        id: 'tent_humidity',
+        name: (hass: HomeAssistant) => TranslationUtils.translateSensor(hass, 'humidity'),
+        group: 'tent_sensors',
+        type: 'sensor',
+        clickAction: 'more-info' as ClickAction,
+        unit: '%',
+        isSensor: true,
+        showStatusBar: true,
+        getValue: (hass, plant) => getEntityState(hass, plant, 'sensor', 'humidity')
+    },
+    {
+        id: 'tent_co2',
+        name: (hass: HomeAssistant) => TranslationUtils.translateSensor(hass, 'co2'),
+        group: 'tent_sensors',
+        type: 'sensor',
+        clickAction: 'more-info' as ClickAction,
+        unit: 'ppm',
+        isSensor: true,
+        showStatusBar: true,
+        getValue: (hass, plant) => getEntityState(hass, plant, 'sensor', 'co2')
+    },
+    {
+        id: 'tent_power_consumption',
+        name: (hass: HomeAssistant) => TranslationUtils.translateSensor(hass, 'power_consumption'),
+        group: 'tent_sensors',
+        type: 'sensor',
+        clickAction: 'more-info' as ClickAction,
+        unit: 'W',
+        isSensor: true,
+        showStatusBar: true,
+        getValue: (hass, plant) => getEntityState(hass, plant, 'sensor', 'power_consumption')
+    },
+    {
+        id: 'tent_ph',
+        name: (hass: HomeAssistant) => TranslationUtils.translateSensor(hass, 'ph'),
+        group: 'tent_sensors',
+        type: 'sensor',
+        clickAction: 'more-info' as ClickAction,
+        unit: 'pH',
+        isSensor: true,
+        showStatusBar: true,
+        getValue: (hass, plant) => getEntityState(hass, plant, 'sensor', 'ph')
+    },
+
     // Sensors group
     {
         id: 'soil_moisture',

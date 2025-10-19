@@ -28,11 +28,15 @@ export class SensorUtils {
     static getSensorInfo(hass: HomeAssistant, plant: HomeAssistantEntity, sensorId: string): SensorInfo {
         const field = getFieldDefinition(sensorId);
         
-        // Only use entity ID from sensor map
+        // First try direct sensor mapping (existing approach)
         const entity = getSensorMapEntity(hass, plant, sensorId);
         if (entity) {
+            // Check if the entity state is a valid number
+            const numericValue = Number(entity.state);
+            const isValidNumber = !isNaN(numericValue) && isFinite(numericValue);
+            
             return {
-                value: Number(entity.state) || 0,
+                value: isValidNumber ? numericValue : 0,
                 state: entity.state,
                 unit: field?.unit || entity.attributes.unit_of_measurement || '',
                 min: entity.attributes.min_value,
@@ -40,7 +44,7 @@ export class SensorUtils {
             };
         }
         
-        // Check if we have API info
+        // Check if we have API info with tent-assigned sensors
         if (plant.attributes._apiInfo) {
             const apiInfo = plant.attributes._apiInfo as ApiInfo;
             
@@ -56,9 +60,13 @@ export class SensorUtils {
             const apiSensorId = apiSensorMap[sensorId] || sensorId;
             
             // For main sensors (directly in root object)
-            if (apiInfo[apiSensorId] && apiInfo[apiSensorId].current) {
+            if (apiInfo[apiSensorId] && apiInfo[apiSensorId].current !== undefined && apiInfo[apiSensorId].current !== null) {
+                // Check if the API value is a valid number
+                const numericValue = Number(apiInfo[apiSensorId].current);
+                const isValidNumber = !isNaN(numericValue) && isFinite(numericValue);
+                
                 return {
-                    value: Number(apiInfo[apiSensorId].current) || 0,
+                    value: isValidNumber ? numericValue : 0,
                     state: String(apiInfo[apiSensorId].current),
                     unit: field?.unit || apiInfo[apiSensorId].unit_of_measurement || '',
                     min: apiInfo[apiSensorId].min ? Number(apiInfo[apiSensorId].min) : null,
@@ -69,9 +77,14 @@ export class SensorUtils {
             // For diagnostic sensors
             if (apiInfo.diagnostic_sensors && 
                 apiInfo.diagnostic_sensors[apiSensorId] && 
-                apiInfo.diagnostic_sensors[apiSensorId].current) {
+                apiInfo.diagnostic_sensors[apiSensorId].current !== undefined && 
+                apiInfo.diagnostic_sensors[apiSensorId].current !== null) {
+                // Check if the API value is a valid number
+                const numericValue = Number(apiInfo.diagnostic_sensors[apiSensorId].current);
+                const isValidNumber = !isNaN(numericValue) && isFinite(numericValue);
+                
                 return {
-                    value: Number(apiInfo.diagnostic_sensors[apiSensorId].current) || 0,
+                    value: isValidNumber ? numericValue : 0,
                     state: String(apiInfo.diagnostic_sensors[apiSensorId].current),
                     unit: field?.unit || apiInfo.diagnostic_sensors[apiSensorId].unit_of_measurement || '',
                     min: null,

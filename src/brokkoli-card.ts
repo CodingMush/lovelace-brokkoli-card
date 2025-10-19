@@ -131,7 +131,7 @@ export default class BrokkoliCard extends LitElement {
     static getStubConfig(ha: HomeAssistant) {
         const isPlant = (entity: HomeAssistantEntity | unknown): entity is HomeAssistantEntity => {
             if (typeof entity == 'object' && 'entity_id' in entity && typeof entity.entity_id == 'string' && 
-                (entity.entity_id.indexOf('plant.') === 0 || entity.entity_id.indexOf('cycle.') === 0)) {
+                (entity.entity_id.indexOf('plant.') === 0 || entity.entity_id.indexOf('cycle.') === 0 || entity.entity_id.indexOf('tent.') === 0)) {
                 return !!entity;
             }
         }
@@ -194,6 +194,15 @@ export default class BrokkoliCard extends LitElement {
 
     // Hilfsfunktion zum Rendern eines Elements basierend auf der Konfiguration
     private _renderElement(element: string): TemplateResult {
+        // Prüfe den Entitätstyp
+        const isTent = this.stateObj?.entity_id.startsWith('tent.') || false;
+        
+        // Für Zelte verwenden wir andere Elemente
+        if (isTent) {
+            return this._renderTentElement(element);
+        }
+        
+        // Für Pflanzen und Cycles verwenden wir die bestehenden Elemente
         switch(element) {
             case 'header':
                 return this._renderHeader();
@@ -215,105 +224,170 @@ export default class BrokkoliCard extends LitElement {
     }
 
     private _renderHeader(): TemplateResult {
-        const headerCssClass = this.config.display_type === DisplayType.Compact ? "header-compact" : "header";
-        const plantName = this.stateObj.entity_id.split('.')[1];
-        
-        // Prüfe, ob es sich um einen Cycle handelt
+        if (!this._hass || !this.stateObj) {
+            return html``;
+        }
+
+        // Prüfe den Entitätstyp
+        const isTent = this.stateObj.entity_id.startsWith('tent.');
         const isCycle = this.stateObj.entity_id.startsWith('cycle.');
-        const isSelectedPlant = this.selectedPlantEntity !== null;
+    
+        // Hole den Namen aus den Attributen oder verwende den Entity-Namen
+        const name = this.stateObj.attributes.friendly_name || this.stateObj.entity_id.split('.')[1];
         
-        // Informationen für Plants oder Cycles unterschiedlich darstellen
-        let infoLine = '';
-        let memberPlants: string[] = [];
-        
-        // Hole die member_plants aus dem ursprünglichen Cycle, wenn eine Plant ausgewählt ist
-        if (isSelectedPlant && this._popupData.originalEntity) {
-            const originalCycleName = this._popupData.originalEntity.split('.')[1];
-            const growthPhaseEntity = this._hass.states[`select.${originalCycleName}_growth_phase`];
-            
-            if (growthPhaseEntity && growthPhaseEntity.attributes.member_plants) {
-                memberPlants = growthPhaseEntity.attributes.member_plants;
-            }
+        // Bestimme das Icon basierend auf dem Entitätstyp
+        let icon = 'mdi:flower-outline'; // Standard für Pflanzen
+        if (isTent) {
+            icon = 'mdi:tent';
         } else if (isCycle) {
-            // Bei einem Cycle die member_plants direkt aus dem Cycle holen
-            const cycleName = this.stateObj.entity_id.split('.')[1];
-            const growthPhaseEntity = this._hass.states[`select.${cycleName}_growth_phase`];
-            
-            if (growthPhaseEntity && growthPhaseEntity.attributes.member_plants) {
-                memberPlants = growthPhaseEntity.attributes.member_plants;
-            }
+            icon = 'mdi:grass';
         }
         
-        // Setze die Info-Zeile basierend auf dem Typ (Cycle oder Plant)
-        if (isCycle) {
-            // Bei einem Cycle zeigen wir die Anzahl der Plants an
-            const memberCount = this.stateObj.attributes.member_count || 0;
-            const plantsText = TranslationUtils.translateUI(this._hass, 'plants_count');
-            infoLine = `${memberCount} ${plantsText}`;
-        } else if (this._listenToSelector && this._selectedEntities.length > 1) {
-            // Bei Mehrfachauswahl zeigen wir die Anzahl der ausgewählten Pflanzen an
-            const selectedText = TranslationUtils.translateUI(this._hass, 'plants_selected');
-            infoLine = `${this._selectedEntities.length} ${selectedText}`;
-        } else {
-            // Bei einer Plant zeigen wir Strain und Breeder an
-            infoLine = this.stateObj.attributes.strain + " - " + this.stateObj.attributes.breeder;
+        // Hole das Wachstumsphasen-Icon (nur für Pflanzen)
+        let growthPhaseIcon = '';
+        if (!isTent && this.stateObj.attributes.growth_phase) {
+            growthPhaseIcon = this.getGrowthPhaseIcon(this.stateObj.attributes.growth_phase);
         }
-        
-        const growthPhaseEntity = this._hass.states[`select.${plantName}_growth_phase`];
-        const potSizeEntity = this._hass.states[`number.${plantName}_pot_size`];
-
-        const unavailableText = TranslationUtils.translateUI(this._hass, 'unavailable');
-        const growthPhase = growthPhaseEntity ? TranslationUtils.translateGrowthPhase(this._hass, growthPhaseEntity.state) : unavailableText;
-        const potSize = potSizeEntity ? potSizeEntity.state + 'L' : unavailableText;
-
-        // Prüfe, ob der Header das einzige Element ist
-        const showDivider = this.config.show_elements.length > 1;
 
         return html`
-            <div class="${headerCssClass}">
-                <div class="menu-button" @click="${this._toggleFlyoutMenu}">
-                    <ha-icon icon="mdi:dots-vertical"></ha-icon>
+            <div class="header">
+                <div class="header-left">
+                    <div class="entity-icon">
+                        <ha-icon icon="${icon}"></ha-icon>
+                    </div>
+                    <div class="entity-info">
+                        <div class="entity-name">${name}</div>
+                        ${!isTent && this.stateObj.attributes.growth_phase ? html`
+                            <div class="growth-phase">
+                                <ha-icon icon="${growthPhaseIcon}"></ha-icon>
+                                ${TranslationUtils.translateGrowthPhase(this._hass, this.stateObj.attributes.growth_phase)}
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
-                ${this._showFlyoutMenu ? this._renderFlyoutMenu() : ''}
-                <div class="image-container">
-                    <img class="back-image" 
-                         src="${this._imageUrls[this._nextImageIndex] || this._imageUrls[this._currentImageIndex] || missingImage}">
-                    <img class="front-image ${this._isFading ? 'fade' : ''}" 
-                         src="${this._imageUrls[this._currentImageIndex] || missingImage}" 
-                         @click="${() => this._showGallery = true}">
+                <div class="header-right">
+                    ${this._renderBattery()}
+                    <ha-icon-button
+                        .label=${this._hass.localize("ui.dialogs.more_info_control.inspect")}
+                        .path=${mdiInformationOutline}
+                        @click=${this._handleMoreInfo}
+                    ></ha-icon-button>
                 </div>
-                <span id="name" @click="${() => moreInfo(this, this.stateObj.entity_id)}"> ${this.stateObj.attributes.friendly_name
-                } <ha-icon .icon="mdi:${this.stateObj.state.toLowerCase() == "problem"
-                    ? "alert-circle-outline"
-                    : ""
-                }"></ha-icon>
-                </span>
-                <span id="battery">${renderBattery(this)}</span>
-                ${isCycle || isSelectedPlant || (this._listenToSelector !== null && this._selectedEntities.length > 0) ? 
-                    html`
-                    <div id="species" class="plant-dropdown-container">
-                        <div @click="${this._togglePlantDropdown}" class="clickable-plants">
-                            ${infoLine}
-                            <ha-icon icon="mdi:chevron-down"></ha-icon>
+            </div>
+        `;
+    }
+
+    private _renderTentElement(element: string): TemplateResult {
+        if (!this._hass || !this.stateObj) {
+            return html``;
+        }
+        
+        switch(element) {
+            case 'header':
+                return this._renderHeader();
+            case 'sensors':
+                return this._renderTentSensors();
+            case 'maintenance':
+                return this._renderTentMaintenance();
+            case 'journal':
+                return this._renderTentJournal();
+            default:
+                return html``;
+        }
+    }
+
+    private _renderTentSensors(): TemplateResult {
+        if (!this._hass || !this.stateObj) {
+            return html``;
+        }
+        
+        // Hole Sensor-Informationen aus den Attributen
+        const sensors = this.stateObj.attributes.sensors || [];
+        const sensorDetails = this.stateObj.attributes.sensor_details || [];
+        
+        return html`
+            <div class="tent-sensors">
+                <h3>Sensoren</h3>
+                <div class="sensor-grid">
+                    ${sensorDetails.map((sensor: any) => html`
+                        <div class="sensor-card">
+                            <div class="sensor-name">${sensor.entity_id}</div>
+                            ${sensor.state ? html`
+                                <div class="sensor-value">${sensor.state.state} ${sensor.state.unit}</div>
+                                <div class="sensor-device-class">${sensor.state.device_class}</div>
+                            ` : html`
+                                <div class="sensor-value">Keine Daten</div>
+                            `}
                         </div>
-                        ${this._showPlantDropdown ? this._renderPlantDropdown(memberPlants) : ''}
-                    </div>
-                    ` : 
-                    html`<span id="species">${infoLine}</span>`
-                }
-                ${this.config.display_type !== DisplayType.Compact ? html`
-                <div id="status-container">
-                    <span @click="${() => moreInfo(this, `number.${plantName}_pot_size`)}">
-                        <ha-icon icon="mdi:cup"></ha-icon>${potSize}
-                    </span>
-                    <span @click="${() => moreInfo(this, `select.${plantName}_growth_phase`)}">
-                        <ha-icon icon="${this.getGrowthPhaseIcon(growthPhase)}"></ha-icon>${growthPhase}
-                    </span>
-                    </div>
-                ` : ''}
+                    `)}
                 </div>
-                ${showDivider ? html`<div class="divider"></div>` : ''}
-            ${this._renderPopups()}
+                ${sensors.length === 0 ? html`
+                    <p class="no-sensors">Keine Sensoren zugewiesen</p>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    private _renderTentMaintenance(): TemplateResult {
+        if (!this._hass || !this.stateObj) {
+            return html``;
+        }
+        
+        // Hole Wartungseinträge aus den Attributen
+        const maintenanceEntries = this.stateObj.attributes.maintenance_entries || [];
+        
+        return html`
+            <div class="tent-maintenance">
+                <h3>Wartung</h3>
+                <div class="maintenance-entries">
+                    ${maintenanceEntries.map((entry: any) => html`
+                        <div class="maintenance-entry">
+                            <div class="entry-header">
+                                <span class="timestamp">${new Date(entry.timestamp).toLocaleString()}</span>
+                                <span class="performed-by">${entry.performed_by}</span>
+                            </div>
+                            <div class="entry-content">
+                                <p>${entry.description}</p>
+                                ${entry.cost > 0 ? html`<p class="cost">Kosten: ${entry.cost.toFixed(2)} €</p>` : ''}
+                            </div>
+                        </div>
+                    `)}
+                </div>
+                ${maintenanceEntries.length === 0 ? html`
+                    <p class="no-maintenance">Keine Wartungseinträge vorhanden</p>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    private _renderTentJournal(): TemplateResult {
+        if (!this._hass || !this.stateObj) {
+            return html``;
+        }
+        
+        // Hole Journal-Einträge aus den Attributen
+        const journalEntries = this.stateObj.attributes.journal_entries || [];
+        
+        return html`
+            <div class="tent-journal">
+                <h3>Journal</h3>
+                <div class="journal-entries">
+                    ${journalEntries.map((entry: any) => html`
+                        <div class="journal-entry">
+                            <div class="entry-header">
+                                <span class="timestamp">${new Date(entry.timestamp).toLocaleString()}</span>
+                                <span class="author">${entry.author}</span>
+                            </div>
+                            <div class="entry-content">
+                                <p>${entry.content}</p>
+                            </div>
+                        </div>
+                    `)}
+                </div>
+                ${journalEntries.length === 0 ? html`
+                    <p class="no-journal">Keine Journal-Einträge vorhanden</p>
+                ` : ''}
+            </div>
         `;
     }
 

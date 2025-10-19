@@ -37,6 +37,9 @@ export class PlantEntityUtils {
                 ? (response as { result: Record<string, unknown> }).result 
                 : null;
             
+            // Debug log the result
+            console.debug(`[PLANT-ENTITY] API response for ${plantEntityId}:`, result);
+            
             // Store result in cache
             if (result) {
                 this._plantInfoCache[plantEntityId] = result;
@@ -108,7 +111,7 @@ export class PlantEntityUtils {
         this._plantRetryTimeouts = {};
     }
 
-    static getPlantEntities(hass: HomeAssistant, filter: 'plant' | 'cycle' | 'all' = 'all'): HomeAssistantEntity[] {
+    static getPlantEntities(hass: HomeAssistant, filter: 'plant' | 'cycle' | 'tent' | 'all' = 'all'): HomeAssistantEntity[] {
         return Object.values(hass.states)
             .filter((entity): entity is HomeAssistantEntity => {
                 if (
@@ -123,10 +126,12 @@ export class PlantEntityUtils {
                 
                 const isPlant = entity.entity_id.startsWith('plant.');
                 const isCycle = entity.entity_id.startsWith('cycle.') && 'member_count' in (entity.attributes as Record<string, unknown>);
+                const isTent = entity.entity_id.startsWith('tent.');
                 
                 if (filter === 'plant') return isPlant;
                 if (filter === 'cycle') return isCycle;
-                return isPlant || isCycle;
+                if (filter === 'tent') return isTent;
+                return isPlant || isCycle || isTent;
             });
     }
 
@@ -178,4 +183,4 @@ export class PlantEntityUtils {
     static clearPlantSelection(): Set<string> {
         return new Set();
     }
-} 
+}

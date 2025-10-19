@@ -1,7 +1,8 @@
 import { LitElement, html, css } from 'lit';
-import { property } from 'lit/decorators.js';
+import { property, state } from 'lit/decorators.js';
 import { HomeAssistant } from 'custom-card-helpers';
 import { TranslationUtils } from '../utils/translation-utils';
+import './tent-create-dialog';
 
 interface HassEntity {
   attributes: {
@@ -11,8 +12,6 @@ interface HassEntity {
   // weitere Eigenschaften können hier hinzugefügt werden
 }
 
-
-
 // Prüfen, ob das Element bereits definiert ist
 const isElementDefined = customElements.get('plant-create-dialog');
 
@@ -21,6 +20,7 @@ class PlantCreateDialogClass extends LitElement {
   @property({ attribute: false }) hass?: HomeAssistant;
   @property() position = { x: 0, y: 0 };
   @property() areaId?: string;
+  @state() private _showPlantForm = true;
 
   // Schließt den Dialog
   closeDialog() {
@@ -104,6 +104,16 @@ class PlantCreateDialogClass extends LitElement {
     }
   }
 
+  private _handleTentCreated(e: CustomEvent) {
+    // Handle tent creation event
+    this.dispatchEvent(new CustomEvent('tent-created', {
+      bubbles: true,
+      composed: true,
+      detail: e.detail
+    }));
+    this.closeDialog();
+  }
+
   render() {
     if (!this.hass) return html``;
 
@@ -111,179 +121,200 @@ class PlantCreateDialogClass extends LitElement {
       <div class="dialog-container">
         <div class="dialog-content">
           <div class="dialog-header">
-            <h2>Neue Pflanze erstellen</h2>
+            <h2>Neue Pflanze/Zelt erstellen</h2>
             <button class="close-button" @click=${this.closeDialog}>×</button>
           </div>
-          <form @submit=${this.createPlant}>
-            <div class="form-field">
-              <label for="name">Name</label>
-              <input type="text" id="name" name="name" required>
-            </div>
-            <div class="form-field">
-              <label for="strain">Strain</label>
-              <input type="text" id="strain" name="strain" required>
-            </div>
-            <div class="form-field">
-              <label for="breeder">Breeder</label>
-              <input type="text" id="breeder" name="breeder" required>
-            </div>
-            <div class="form-field">
-              <label for="plant_emoji">Icon</label>
-              <input type="text" id="plant_emoji" name="plant_emoji" value="🥦">
-            </div>
-            <div class="form-field">
-              <label for="growth_phase">Wachstumsphase</label>
-              <select id="growth_phase" name="growth_phase" required>
-                <option value="seeds">${TranslationUtils.translateGrowthPhase(this.hass, 'seeds')}</option>
-                <option value="germination">${TranslationUtils.translateGrowthPhase(this.hass, 'germination')}</option>
-                <option value="rooting" selected>${TranslationUtils.translateGrowthPhase(this.hass, 'rooting')}</option>
-                <option value="growing">${TranslationUtils.translateGrowthPhase(this.hass, 'growing')}</option>
-                <option value="flowering">${TranslationUtils.translateGrowthPhase(this.hass, 'flowering')}</option>
-                <option value="removed">${TranslationUtils.translateGrowthPhase(this.hass, 'removed')}</option>
-                <option value="harvested">${TranslationUtils.translateGrowthPhase(this.hass, 'harvested')}</option>
-              </select>
-            </div>
-
-            <div class="form-field">
-              <label for="temperature_sensor">Temperatursensor</label>
-              <select id="temperature_sensor" name="temperature_sensor">
-                <option value="">Keiner</option>
-                ${Object.entries(this.hass.states)
-                  .filter(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return id.startsWith('sensor.') &&
-                      hassEntity.attributes &&
-                      hassEntity.attributes.device_class === 'temperature';
-                  })
-                  .map(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
-                  })
-                }
-              </select>
-            </div>
-
-            <div class="form-field">
-              <label for="moisture_sensor">Feuchtigkeitssensor</label>
-              <select id="moisture_sensor" name="moisture_sensor">
-                <option value="">Keiner</option>
-                ${Object.entries(this.hass.states)
-                  .filter(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return id.startsWith('sensor.') &&
-                      hassEntity.attributes &&
-                      hassEntity.attributes.device_class === 'moisture';
-                  })
-                  .map(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
-                  })
-                }
-              </select>
-            </div>
-
-            <div class="form-field">
-              <label for="conductivity_sensor">Leitfähigkeitssensor</label>
-              <select id="conductivity_sensor" name="conductivity_sensor">
-                <option value="">Keiner</option>
-                ${Object.entries(this.hass.states)
-                  .filter(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return id.startsWith('sensor.') &&
-                      hassEntity.attributes &&
-                      hassEntity.attributes.device_class === 'conductivity';
-                  })
-                  .map(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
-                  })
-                }
-              </select>
-            </div>
-
-            <div class="form-field">
-              <label for="ph_sensor">pH-Sensor</label>
-              <select id="ph_sensor" name="ph_sensor">
-                <option value="">Keiner</option>
-                ${Object.entries(this.hass.states)
-                  .filter(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return id.startsWith('sensor.') &&
-                      hassEntity.attributes &&
-                      hassEntity.attributes.device_class === 'ph';
-                  })
-                  .map(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
-                  })
-                }
-              </select>
-            </div>
-
-            <div class="form-field">
-              <label for="illuminance_sensor">Helligkeitssensor</label>
-              <select id="illuminance_sensor" name="illuminance_sensor">
-                <option value="">Keiner</option>
-                ${Object.entries(this.hass.states)
-                  .filter(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return id.startsWith('sensor.') &&
-                      hassEntity.attributes &&
-                      hassEntity.attributes.device_class === 'illuminance';
-                  })
-                  .map(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
-                  })
-                }
-              </select>
-            </div>
-
-            <div class="form-field">
-              <label for="humidity_sensor">Luftfeuchtigkeitssensor</label>
-              <select id="humidity_sensor" name="humidity_sensor">
-                <option value="">Keiner</option>
-                ${Object.entries(this.hass.states)
-                  .filter(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return id.startsWith('sensor.') &&
-                      hassEntity.attributes &&
-                      hassEntity.attributes.device_class === 'humidity';
-                  })
-                  .map(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
-                  })
-                }
-              </select>
-            </div>
-
-            <div class="form-field">
-              <label for="power_consumption_sensor">Energieverbrauchssensor</label>
-              <select id="power_consumption_sensor" name="power_consumption_sensor">
-                <option value="">Keiner</option>
-                ${Object.entries(this.hass.states)
-                  .filter(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return id.startsWith('sensor.') &&
-                      hassEntity.attributes &&
-                      hassEntity.attributes.device_class === 'energy';
-                  })
-                  .map(([id, entity]) => {
-                    const hassEntity = entity as HassEntity;
-                    return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
-                  })
-                }
-              </select>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" @click=${this.closeDialog}>Abbrechen</button>
-              <button type="submit">Erstellen</button>
-            </div>
-          </form>
+          
+          <div class="entity-type-selector">
+            <button class="entity-type-button ${this._showPlantForm ? 'active' : ''}" @click=${() => this._showPlantForm = true}>
+              <ha-icon icon="mdi:flower-outline"></ha-icon>
+              <span>Pflanze</span>
+            </button>
+            <button class="entity-type-button ${!this._showPlantForm ? 'active' : ''}" @click=${() => this._showPlantForm = false}>
+              <ha-icon icon="mdi:tent"></ha-icon>
+              <span>Zelt</span>
+            </button>
+          </div>
+          
+          ${this._showPlantForm 
+            ? this._renderPlantForm()
+            : html`<tent-create-dialog .hass=${this.hass} @dialog-closed=${this.closeDialog} @tent-created=${this._handleTentCreated}></tent-create-dialog>`
+          }
         </div>
       </div>
+    `;
+  }
+
+  private _renderPlantForm() {
+    return html`
+      <form @submit=${this.createPlant}>
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-field">
+          <label for="strain">Strain</label>
+          <input type="text" id="strain" name="strain" required>
+        </div>
+        <div class="form-field">
+          <label for="breeder">Breeder</label>
+          <input type="text" id="breeder" name="breeder" required>
+        </div>
+        <div class="form-field">
+          <label for="plant_emoji">Icon</label>
+          <input type="text" id="plant_emoji" name="plant_emoji" value="🥦">
+        </div>
+        <div class="form-field">
+          <label for="growth_phase">Wachstumsphase</label>
+          <select id="growth_phase" name="growth_phase" required>
+            <option value="seeds">${TranslationUtils.translateGrowthPhase(this.hass, 'seeds')}</option>
+            <option value="germination">${TranslationUtils.translateGrowthPhase(this.hass, 'germination')}</option>
+            <option value="rooting" selected>${TranslationUtils.translateGrowthPhase(this.hass, 'rooting')}</option>
+            <option value="growing">${TranslationUtils.translateGrowthPhase(this.hass, 'growing')}</option>
+            <option value="flowering">${TranslationUtils.translateGrowthPhase(this.hass, 'flowering')}</option>
+            <option value="removed">${TranslationUtils.translateGrowthPhase(this.hass, 'removed')}</option>
+            <option value="harvested">${TranslationUtils.translateGrowthPhase(this.hass, 'harvested')}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="temperature_sensor">Temperatursensor</label>
+          <select id="temperature_sensor" name="temperature_sensor">
+            <option value="">Keiner</option>
+            ${Object.entries(this.hass.states)
+              .filter(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return id.startsWith('sensor.') &&
+                  hassEntity.attributes &&
+                  hassEntity.attributes.device_class === 'temperature';
+              })
+              .map(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
+              })
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="moisture_sensor">Feuchtigkeitssensor</label>
+          <select id="moisture_sensor" name="moisture_sensor">
+            <option value="">Keiner</option>
+            ${Object.entries(this.hass.states)
+              .filter(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return id.startsWith('sensor.') &&
+                  hassEntity.attributes &&
+                  hassEntity.attributes.device_class === 'moisture';
+              })
+              .map(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
+              })
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="conductivity_sensor">Leitfähigkeitssensor</label>
+          <select id="conductivity_sensor" name="conductivity_sensor">
+            <option value="">Keiner</option>
+            ${Object.entries(this.hass.states)
+              .filter(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return id.startsWith('sensor.') &&
+                  hassEntity.attributes &&
+                  hassEntity.attributes.device_class === 'conductivity';
+              })
+              .map(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
+              })
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="ph_sensor">pH-Sensor</label>
+          <select id="ph_sensor" name="ph_sensor">
+            <option value="">Keiner</option>
+            ${Object.entries(this.hass.states)
+              .filter(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return id.startsWith('sensor.') &&
+                  hassEntity.attributes &&
+                  hassEntity.attributes.device_class === 'ph';
+              })
+              .map(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
+              })
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="illuminance_sensor">Helligkeitssensor</label>
+          <select id="illuminance_sensor" name="illuminance_sensor">
+            <option value="">Keiner</option>
+            ${Object.entries(this.hass.states)
+              .filter(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return id.startsWith('sensor.') &&
+                  hassEntity.attributes &&
+                  hassEntity.attributes.device_class === 'illuminance';
+              })
+              .map(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
+              })
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="humidity_sensor">Luftfeuchtigkeitssensor</label>
+          <select id="humidity_sensor" name="humidity_sensor">
+            <option value="">Keiner</option>
+            ${Object.entries(this.hass.states)
+              .filter(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return id.startsWith('sensor.') &&
+                  hassEntity.attributes &&
+                  hassEntity.attributes.device_class === 'humidity';
+              })
+              .map(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
+              })
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="power_consumption_sensor">Energieverbrauchssensor</label>
+          <select id="power_consumption_sensor" name="power_consumption_sensor">
+            <option value="">Keiner</option>
+            ${Object.entries(this.hass.states)
+              .filter(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return id.startsWith('sensor.') &&
+                  hassEntity.attributes &&
+                  hassEntity.attributes.device_class === 'energy';
+              })
+              .map(([id, entity]) => {
+                const hassEntity = entity as HassEntity;
+                return html`<option value="${id}">${hassEntity.attributes.friendly_name || id}</option>`;
+              })
+            }
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" @click=${this.closeDialog}>Abbrechen</button>
+          <button type="submit">Erstellen</button>
+        </div>
+      </form>
     `;
   }
 
@@ -335,6 +366,35 @@ class PlantCreateDialogClass extends LitElement {
         line-height: 1;
         width: 2rem;
         height: 2rem;
+      }
+
+      .entity-type-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .entity-type-button {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid var(--divider-color, #e0e0e0);
+        border-radius: 8px;
+        background: var(--secondary-background-color, #f5f5f5);
+        cursor: pointer;
+      }
+
+      .entity-type-button.active {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .entity-type-button ha-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
       }
 
       .form-field {
