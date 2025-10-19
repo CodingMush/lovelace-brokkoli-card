@@ -236,15 +236,21 @@ export const FIELD_DEFINITIONS: FieldDefinition[] = [
 
     // Phase Begin group
     ...PHASES.map(phase => ({
+
         id: `${phase}_start`,
         name: (hass: HomeAssistant) => TranslationUtils.translateField(hass, `${phase}_start`),
         group: 'phasebegin',
         type: 'date' as FieldType,
         clickAction: 'edit' as ClickAction,
         service: PLANT_ATTRIBUTE_SERVICE,
-        getValue: (_: HomeAssistant, plant: HomeAssistantEntity) => {
-            const dateString = plant.attributes[`${phase}_start`];
-            return dateString ? new Date(dateString).getTime() : 0;
+        getValue: (hass: HomeAssistant, plant: HomeAssistantEntity) => {
+            // Get the value from the growth_phase entity attributes
+            const growthPhaseEntity = getSensorMapEntity(hass, plant, 'growth_phase');
+            if (growthPhaseEntity?.attributes) {
+                const dateString = growthPhaseEntity.attributes[`${phase}_start`];
+                return dateString ? new Date(dateString).getTime() : 0;
+            }
+            return 0;
         }
     })),
 
