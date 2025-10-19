@@ -269,7 +269,6 @@ export default class BrokkoliCard extends LitElement {
                     ${this._renderBattery()}
                     <ha-icon-button
                         .label=${this._hass.localize("ui.dialogs.more_info_control.inspect")}
-                        .path=${mdiInformationOutline}
                         @click=${this._handleMoreInfo}
                     ></ha-icon-button>
                 </div>
@@ -1240,6 +1239,16 @@ export default class BrokkoliCard extends LitElement {
         }
         // Leeres div zurückgeben, wenn nicht angezeigt werden soll
         return html`<div class="expanded-content" data-section="attributes"></div>`;
+    }
+
+    private _renderBattery(): TemplateResult {
+        return html`${renderBattery(this)}`;
+    }
+
+    private _handleMoreInfo(): void {
+        if (this.stateObj) {
+            moreInfo(this, this.stateObj.entity_id);
+        }
     }
 
     render(): HTMLTemplateResult {

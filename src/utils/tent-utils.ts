@@ -29,7 +29,7 @@ export class TentUtils {
             if (sensors.ph) serviceData.ph_sensor = sensors.ph;
         }
         
-        return await hass.callService('plant', 'create_tent', serviceData, undefined, undefined, true);
+        return await hass.callService('plant', 'create_tent', serviceData);
     }
 
     /**
@@ -64,7 +64,7 @@ export class TentUtils {
      * @returns Promise with the list of tents
      */
     static async listTents(hass: HomeAssistant): Promise<any> {
-        return await hass.callService('plant', 'list_tents', {}, undefined, undefined, true);
+        return await hass.callService('plant', 'list_tents', {});
     }
 
     /**
