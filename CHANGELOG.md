@@ -1,5 +1,32 @@
 # Changelog
 
+## [3.0.2] - 2025-10-20
+
+### Fixed
+- **Phasen-Dauer-Berechnung**: Korrigiert unrealistische Werte im Pie Chart und Timeline
+  - Phasen-Dauern werden nun korrekt bis zum Start der nächsten Phase berechnet
+  - Verhindert, dass abgeschlossene Phasen bis "heute" berechnet werden
+  - Betrifft: `_calculatePhaseDuration()` in `consumption.ts`
+  - Beispiel: `seeds_start: 2025-07-29` zeigt jetzt 3 Tage (bis `germination_start: 2025-08-01`) statt 83 Tage
+  
+- **List-Card Duration-Anzeige**: Dynamische Berechnung für nicht gesetzte Dauern
+  - Wenn `duration = null`, berechnet die List-Card nun automatisch die Dauer bis zur nächsten Phase
+  - Konsistente Anzeige zwischen Pie Chart, Timeline und List-Card
+  - Betrifft: `cell-renderer.ts` Duration-Felder
+
+- **Tent WebSocket-Unterstützung**: Fehlende `websocket_info`-Property implementiert
+  - Behebt `AttributeError: 'Tent' object has no attribute 'websocket_info'`
+  - Tent-Entities können nun über WebSocket abgefragt werden
+  - Konsistente WebSocket-API für Plant- und Tent-Entities
+  - Betrifft: `tent.py`
+
+### Technical
+- Erweiterte `_calculatePhaseDuration()` mit `nextPhaseStartDate`-Parameter
+- Phasen-Mapping für alle Growth-Phasen in `cell-renderer.ts`
+- WebSocket-Response für Tents mit Sensoren, Wartungseinträgen und Journal
+
+---
+
 ## [3.0.1] - 2025-10-19
 
 ### Fixed
