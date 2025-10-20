@@ -324,25 +324,30 @@ export class FlowerConsumption extends LitElement {
         const phaseDurations: PhaseDurations = {
             'seeds': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.seeds_start,
-                growthPhaseEntity.attributes.seeds_duration
+                growthPhaseEntity.attributes.seeds_duration,
+                growthPhaseEntity.attributes.germination_start
             ),
             'Germination': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.germination_start,
-                growthPhaseEntity.attributes.germination_duration
+                growthPhaseEntity.attributes.germination_duration,
+                growthPhaseEntity.attributes.rooting_start
             ),
             'Rooting': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.rooting_start,
-                growthPhaseEntity.attributes.rooting_duration
+                growthPhaseEntity.attributes.rooting_duration,
+                growthPhaseEntity.attributes.growing_start
             ),
             'Growing': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.growing_start,
-                growthPhaseEntity.attributes.growing_duration
+                growthPhaseEntity.attributes.growing_duration,
+                growthPhaseEntity.attributes.flowering_start
             ),
             'Flowering Past': 0,
             'Flowering To Go': 0,
             'Harvested': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.harvested,
-                growthPhaseEntity.attributes.harvested_duration
+                growthPhaseEntity.attributes.harvested_duration,
+                growthPhaseEntity.attributes.removed_start
             )
         };
 
@@ -390,16 +395,29 @@ ${TranslationUtils.translateUI(this.hass, 'no_completed_phases')}
         `;
     }
 
-    private _calculatePhaseDuration(startDate: string | null, duration: number | null): number {
+    private _calculatePhaseDuration(
+        startDate: string | null, 
+        duration: number | null,
+        nextPhaseStartDate?: string | null
+    ): number {
         if (!startDate || startDate === 'null' || startDate === '') return 0;
 
         if (duration) return duration;
 
         // Wenn keine Dauer gesetzt ist, aber ein Startdatum existiert,
-        // berechne die Dauer als Differenz von heute zum Startdatum
+        // berechne die Dauer bis zum Start der nächsten Phase (falls vorhanden) oder bis heute
         const start = new Date(startDate);
-        const now = new Date();
-        return Math.max(0, Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+        
+        // Wenn es eine nächste Phase gibt, verwende deren Startdatum als Ende
+        let endDate: Date;
+        if (nextPhaseStartDate && nextPhaseStartDate !== 'null' && nextPhaseStartDate !== '') {
+            endDate = new Date(nextPhaseStartDate);
+        } else {
+            // Sonst verwende heute als Ende (z.B. für die aktuelle Phase)
+            endDate = new Date();
+        }
+        
+        return Math.max(0, Math.floor((endDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
     }
 
     private _getPhaseDataString(growthPhaseEntity: { attributes: Record<string, unknown> }): string {
@@ -448,25 +466,30 @@ ${TranslationUtils.translateUI(this.hass, 'no_completed_phases')}
         const phaseDurations: PhaseDurations = {
             'seeds': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.seeds_start,
-                growthPhaseEntity.attributes.seeds_duration
+                growthPhaseEntity.attributes.seeds_duration,
+                growthPhaseEntity.attributes.germination_start
             ),
             'Germination': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.germination_start,
-                growthPhaseEntity.attributes.germination_duration
+                growthPhaseEntity.attributes.germination_duration,
+                growthPhaseEntity.attributes.rooting_start
             ),
             'Rooting': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.rooting_start,
-                growthPhaseEntity.attributes.rooting_duration
+                growthPhaseEntity.attributes.rooting_duration,
+                growthPhaseEntity.attributes.growing_start
             ),
             'Growing': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.growing_start,
-                growthPhaseEntity.attributes.growing_duration
+                growthPhaseEntity.attributes.growing_duration,
+                growthPhaseEntity.attributes.flowering_start
             ),
             'Flowering Past': 0,
             'Flowering To Go': 0,
             'Harvested': this._calculatePhaseDuration(
                 growthPhaseEntity.attributes.harvested,
-                growthPhaseEntity.attributes.harvested_duration
+                growthPhaseEntity.attributes.harvested_duration,
+                growthPhaseEntity.attributes.removed_start
             )
         };
 
