@@ -129,7 +129,49 @@ export class CellRenderer {
                 const entityId = plant.attributes._sensorMap['growth_phase'];
                 phaseEntity = hass?.states[entityId];
                 
-                const duration = phaseEntity?.attributes[columnId];
+                let duration = phaseEntity?.attributes[columnId];
+                
+                // Wenn keine Dauer gesetzt ist, berechne sie dynamisch
+                if (!duration && phaseEntity?.attributes) {
+                    // Bestimme das Startdatum basierend auf dem columnId
+                    const phaseMap: Record<string, { start: string; next: string }> = {
+                        'seeds_duration': { start: 'seeds_start', next: 'germination_start' },
+                        'germination_duration': { start: 'germination_start', next: 'rooting_start' },
+                        'rooting_duration': { start: 'rooting_start', next: 'growing_start' },
+                        'growing_duration': { start: 'growing_start', next: 'flowering_start' },
+                        'flower_duration': { start: 'flowering_start', next: 'harvested_start' },
+                        'harvested_duration': { start: 'harvested_start', next: 'removed_start' },
+                        'removed_duration': { start: 'removed_start', next: null }
+                    };
+                    
+                    const phaseInfo = phaseMap[columnId];
+                    if (phaseInfo) {
+                        const startDate = phaseEntity.attributes[phaseInfo.start];
+                        
+                        if (startDate && startDate !== 'null' && startDate !== '') {
+                            const start = new Date(startDate);
+                            let endDate: Date;
+                            
+                            // Wenn es eine nächste Phase gibt, verwende deren Startdatum
+                            if (phaseInfo.next) {
+                                const nextStart = phaseEntity.attributes[phaseInfo.next];
+                                if (nextStart && nextStart !== 'null' && nextStart !== '') {
+                                    endDate = new Date(nextStart);
+                                } else {
+                                    // Keine nächste Phase, verwende heute
+                                    endDate = new Date();
+                                }
+                            } else {
+                                // Letzte Phase (removed), verwende heute
+                                endDate = new Date();
+                            }
+                            
+                            // Berechne die Dauer in Tagen
+                            duration = Math.max(0, Math.floor((endDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+                        }
+                    }
+                }
+                
                 return html`
                     <span @click=${templateOptions.onClick}>
                         ${duration ? `${duration} ${TranslationUtils.translateUI(hass, 'days')}` : '-'}
