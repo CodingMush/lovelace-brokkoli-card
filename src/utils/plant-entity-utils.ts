@@ -12,6 +12,12 @@ export class PlantEntityUtils {
     private static _plantLastLoaded: Record<string, number> = {};
 
     static async getPlantInfo(hass: HomeAssistant, plantEntityId: string): Promise<unknown> {
+        // Tent-Entities sollten nicht über plant/get_info abgefragt werden
+        if (plantEntityId.startsWith('tent.')) {
+            console.debug(`[PLANT-ENTITY] Skipping tent entity: ${plantEntityId}`);
+            return null;
+        }
+        
         // If data is in cache, use it
         if (this._plantInfoCache[plantEntityId]) {
             return this._plantInfoCache[plantEntityId];
@@ -84,6 +90,11 @@ export class PlantEntityUtils {
         
         // Start loading for each plant with slightly different initial delay
         plantEntities.forEach((entityId) => {
+            // Skip tent entities - they don't support plant/get_info
+            if (entityId.startsWith('tent.')) {
+                return;
+            }
+            
             // If data already exists in cache, plan only the next fetch
             if (this._plantInfoCache[entityId]) {
                 if (!this._plantRetryTimeouts[entityId]) {
