@@ -311,7 +311,20 @@ export const chartOptions = {
         custom: function({ series, dataPointIndex, w }: { series: unknown[][]; seriesIndex: number; dataPointIndex: number; w: { config: { series: { name: string; unit?: string }[]; colors: string[] }; globals: { seriesX: number[][]; seriesRangeStart?: number[][]; seriesRangeEnd?: number[][] } } }) {
             try {
                 const timestamp = w.globals.seriesX[0][dataPointIndex];
+                
+                // Validiere Timestamp
+                if (!timestamp || isNaN(timestamp) || timestamp <= 0) {
+                    console.warn('[Graph] Ungültiger Timestamp:', timestamp);
+                    return '<div class="tooltip-error">Ungültige Zeitdaten</div>';
+                }
+                
                 const date = new Date(timestamp);
+                
+                // Prüfe ob Date gültig ist
+                if (isNaN(date.getTime())) {
+                    console.warn('[Graph] Ungültiges Datum für Timestamp:', timestamp);
+                    return '<div class="tooltip-error">Ungültiges Datum</div>';
+                }
                 
                 let daysSincePlanting = 0;
                 if (window.startTimestamp) {

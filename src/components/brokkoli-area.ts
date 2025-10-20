@@ -789,6 +789,12 @@ export class BrokkoliArea extends LitElement {
     // und der Gesamtzahl der Ringe
     const radius = (this._cellSize / 2) - (strokeWidth / 2) - (position * strokeWidth);
     
+    // Verhindere negative Radien (falls zu viele Ringe oder zu kleine Zelle)
+    if (radius <= 0) {
+      console.warn(`[Brokkoli-Area] Ungültiger Radius für Ring-Position ${position}: ${radius}px (cellSize: ${this._cellSize}px)`);
+      return html``;
+    }
+    
     // Berechne Kreisparameter
     const circumference = 2 * Math.PI * radius;
     const strokeDasharray = `${circumference * percent} ${circumference * (1 - percent)}`;
@@ -849,6 +855,12 @@ export class BrokkoliArea extends LitElement {
     
     // Berechne Radius exakt - ohne Abstände
     const radius = (this._cellSize / 2) - (strokeWidth / 2) - (position * strokeWidth);
+    
+    // Verhindere negative Radien
+    if (radius <= 0) {
+      console.warn(`[Brokkoli-Area] Ungültiger Radius für deaktivierten Ring-Position ${position}: ${radius}px`);
+      return html``;
+    }
     
     return html`
       <svg class="sensor-ring" viewBox="0 0 ${this._cellSize} ${this._cellSize}">
