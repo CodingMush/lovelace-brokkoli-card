@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.0.3] - 2025-10-20
+
+### Fixed
+- **Übersetzungsproblem behoben**: Nach Update auf v3.0.2 wurden Übersetzungen nicht mehr korrekt angewendet
+  - Verbesserte Basis-URL-Erkennung für Übersetzungsdateien
+  - Robustere Fehlerbehandlung bei der Initialisierung
+  - Fallback-Mechanismen für verschiedene Installationsarten (HACS, lokal, manuell)
+  - Betrifft: `translation-utils.ts`
+
+### Technical
+- Erweiterte `getCardBaseUrl()` Methode mit mehreren Fallback-Strategien
+- Debug-Ausgaben für bessere Fehlersuche
+- Alternative Pfade für Übersetzungsdateien
+
+---
+
 ## [3.0.2] - 2025-10-20
 
 ### Fixed
