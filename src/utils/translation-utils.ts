@@ -20,13 +20,41 @@ export class TranslationUtils {
      * Get the base URL for the card (where translations should be located)
      */
     private static getCardBaseUrl(): string {
+        // Try to get base URL from Home Assistant context
+        try {
+            // @ts-ignore
+            if (window.hassConnection && window.hassConnection.hass && window.hassConnection.hass.hassUrl) {
+                // @ts-ignore
+                const hassBaseUrl = window.hassConnection.hass.hassUrl('');
+                const brokkoliBaseUrl = hassBaseUrl.replace(/\/$/, '') + '/hacsfiles/lovelace-brokkoli-card';
+                console.debug(`[TranslationUtils] Found base URL from Home Assistant context: ${brokkoliBaseUrl}`);
+                return brokkoliBaseUrl;
+            }
+        } catch (e) {
+            console.debug('[TranslationUtils] Could not get base URL from Home Assistant context');
+        }
+        
         // Try to determine the base URL from the current script location
         const scripts = document.getElementsByTagName('script');
         for (let i = 0; i < scripts.length; i++) {
             const src = scripts[i].src;
             if (src && (src.includes('brokkoli-card.js') || src.includes('brokkoli-list-card.js') || src.includes('brokkoli-area-card.js'))) {
-                return src.substring(0, src.lastIndexOf('/'));
+                const baseUrl = src.substring(0, src.lastIndexOf('/'));
+                console.debug(`[TranslationUtils] Found base URL from script tag: ${baseUrl}`);
+                return baseUrl;
             }
+        }
+        
+        // Try to get base URL from current document (more reliable)
+        try {
+            const currentScript = document.currentScript as HTMLScriptElement;
+            if (currentScript && currentScript.src) {
+                const baseUrl = currentScript.src.substring(0, currentScript.src.lastIndexOf('/'));
+                console.debug(`[TranslationUtils] Found base URL from currentScript: ${baseUrl}`);
+                return baseUrl;
+            }
+        } catch (e) {
+            console.debug('[TranslationUtils] Could not get base URL from currentScript');
         }
         
         // Fallback: try common locations
@@ -36,7 +64,70 @@ export class TranslationUtils {
             '/config/www/brokkoli-card'
         ];
         
-        // Return the first common path as fallback
+        // Try to detect the actual path from loaded resources
+        for (const path of commonPaths) {
+            try {
+                // Check if translation files exist at this path
+                const testUrl = `${path}/translations/de.json`;
+                // We can't actually fetch here due to async, but we can use a more intelligent approach
+                if (document.querySelector(`script[src*="${path}"]`)) {
+                    console.debug(`[TranslationUtils] Found base URL from document query: ${path}`);
+                    return path;
+                }
+            } catch (e) {
+                // Continue checking other paths
+            }
+        }
+        
+        // Try to determine from document base URI
+        try {
+            const baseUri = document.baseURI || window.location.href;
+            const baseUrl = new URL('/hacsfiles/lovelace-brokkoli-card', baseUri).href;
+            console.debug(`[TranslationUtils] Found base URL from document base URI: ${baseUrl}`);
+            return baseUrl;
+        } catch (e) {
+            console.debug('[TranslationUtils] Could not get base URL from document base URI');
+        }
+        
+        // Try to determine from script elements with known patterns
+        try {
+            const scripts = Array.from(document.querySelectorAll('script[src]'));
+            for (const script of scripts) {
+                const src = (script as HTMLScriptElement).src;
+                if (src.includes('brokkoli')) {
+                    const baseUrl = src.substring(0, src.lastIndexOf('/'));
+                    console.debug(`[TranslationUtils] Found base URL from brokkoli script: ${baseUrl}`);
+                    return baseUrl;
+                }
+            }
+        } catch (e) {
+            console.debug('[TranslationUtils] Could not get base URL from brokkoli scripts');
+        }
+        
+        // Try to determine from Home Assistant custom UI path
+        try {
+            // @ts-ignore
+            if (window.hassCustomElements && typeof window.hassCustomElements === 'object') {
+                // @ts-ignore
+                const customElements = Object.keys(window.hassCustomElements);
+                for (const element of customElements) {
+                    if (element.includes('brokkoli')) {
+                        // @ts-ignore
+                        const elementPath = window.hassCustomElements[element];
+                        if (typeof elementPath === 'string') {
+                            const baseUrl = elementPath.substring(0, elementPath.lastIndexOf('/'));
+                            console.debug(`[TranslationUtils] Found base URL from hassCustomElements: ${baseUrl}`);
+                            return baseUrl;
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.debug('[TranslationUtils] Could not get base URL from hassCustomElements');
+        }
+        
+        // Return the first common path as final fallback
+        console.debug(`[TranslationUtils] Using fallback base URL: ${commonPaths[0]}`);
         return commonPaths[0];
     }
 
@@ -48,15 +139,42 @@ export class TranslationUtils {
             const baseUrl = this.getCardBaseUrl();
             const url = `${baseUrl}/translations/${language}.json`;
             
+            console.debug(`[TranslationUtils] Trying to load translations from: ${url}`);
+            
             const response = await fetch(url);
             if (!response.ok) {
+                console.warn(`[TranslationUtils] Failed to load translation file: ${response.status} ${response.statusText} from ${url}`);
+                
+                // Try alternative paths
+                const alternativePaths = [
+                    `${baseUrl}/${language}.json`,
+                    `/local/translations/${language}.json`,
+                    `/hacsfiles/lovelace-brokkoli-card/translations/${language}.json`,
+                    `/config/www/brokkoli-card/translations/${language}.json`
+                ];
+                
+                for (const altPath of alternativePaths) {
+                    try {
+                        console.debug(`[TranslationUtils] Trying alternative path: ${altPath}`);
+                        const altResponse = await fetch(altPath);
+                        if (altResponse.ok) {
+                            const translations = await altResponse.json();
+                            console.debug(`[TranslationUtils] Successfully loaded translations from alternative path: ${altPath}`);
+                            return translations;
+                        }
+                    } catch (altError) {
+                        console.debug(`[TranslationUtils] Alternative path failed: ${altPath}`, altError);
+                    }
+                }
+                
                 throw new Error(`Failed to load translation file: ${response.status}`);
             }
             
             const translations = await response.json();
+            console.debug(`[TranslationUtils] Successfully loaded translations for ${language}`);
             return translations;
         } catch (error) {
-            console.warn(`Failed to load translations for language ${language}, falling back to English`, error);
+            console.warn(`[TranslationUtils] Failed to load translations for language ${language}, falling back to English`, error);
             // Fallback to English if language file not found
             if (language !== 'en') {
                 return this.loadTranslationFile('en');
@@ -103,16 +221,20 @@ export class TranslationUtils {
         
         // If translations are cached, use them
         if (this.translationCache.has(language)) {
-            return this.getTranslationFromObject(this.translationCache.get(language)!, key);
+            const result = this.getTranslationFromObject(this.translationCache.get(language)!, key);
+            console.debug(`[TranslationUtils] Translated '${key}' to '${result}' for language ${language}`);
+            return result;
         }
 
         // If not cached and not initialized, start loading
         if (!this.isInitialized) {
+            console.debug(`[TranslationUtils] Initializing translations for language ${language}`);
             this.loadTranslations(language).catch(error => {
                 console.warn('Failed to load translations:', error);
             });
         }
 
+        console.debug(`[TranslationUtils] Translation not found in cache for '${key}', returning key`);
         return key; // Return key as fallback until translations are loaded
     }
 
